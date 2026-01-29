@@ -1,0 +1,59 @@
+name: Build Windows EXE and GitHub Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: Build EXE with PyInstaller
+        run: |
+          pyinstaller RCS.py ^
+            --onefile ^
+            --noconsole ^
+            --name RCS-Calculator-3D ^
+            --collect-all pyvista ^
+            --collect-all trimesh ^
+            --collect-all matplotlib
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: RCS-Calculator-3D-exe
+          path: dist/RCS-Calculator-3D.exe
+
+  create-release:
+    needs: build-windows
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: RCS-Calculator-3D-exe
+          path: ./dist
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ./dist/RCS-Calculator-3D.exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
