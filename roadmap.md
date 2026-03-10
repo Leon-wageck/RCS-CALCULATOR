@@ -1105,9 +1105,3 @@ documentation is unclear
 examples are missing
 ```
 
-Distribution quality should therefore be treated as a core project milestone.
-
----
-
-If you'd like, I can also write a **README structure that makes the project look immediately professional to researchers** (this matters a lot for adoption).
-
