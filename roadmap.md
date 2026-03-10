@@ -1,7 +1,4 @@
 
-Absolutely — here’s a **single roadmap text** you can paste into a GitHub Project, README, Notion page, or split into milestones/issues later.
-
----
 
 # RCS-CALCULATOR ROADMAP
 
