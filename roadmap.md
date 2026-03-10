@@ -701,3 +701,416 @@ That would already make it a serious tool.
 ---
 
 I
+Below is a **Distribution & Deployment section** you can append to your existing roadmap.
+It’s written in the same style as the earlier roadmap so you can **paste it directly into GitHub / README / roadmap.txt**.
+
+---
+
+# MILESTONE 9 — DISTRIBUTION & DEPLOYMENT
+
+## Goal
+
+Make the simulator easy to install, run, and integrate into research workflows across Windows and Linux.
+
+Distribution quality is critical for adoption. A technically strong tool will still fail if users cannot install or run it easily.
+
+The project should support:
+
+* Windows GUI users
+* Linux research environments
+* automated batch workflows
+* reproducible environments
+
+---
+
+# DISTRIBUTION STRATEGY
+
+## Primary Targets
+
+### Windows
+
+Primary entry point for most users.
+
+Provide:
+
+```
+standalone executable
+or simple installer
+```
+
+Requirements:
+
+* no Python installation required
+* bundled dependencies
+* double-click launch
+
+---
+
+### Linux
+
+Primary environment for research and servers.
+
+Provide:
+
+```
+pip installation
+or source install
+```
+
+Requirements:
+
+* tested on Ubuntu LTS
+* documented dependencies
+* reproducible install instructions
+
+---
+
+### Docker
+
+Optional but highly useful for:
+
+```
+reproducible environments
+CI testing
+batch simulations
+server deployments
+```
+
+Docker is especially useful for headless or scripted workflows.
+
+---
+
+# PACKAGING ARCHITECTURE
+
+The project should eventually be split logically into:
+
+```
+rcs-core
+    simulation engine
+    solver implementations
+    physics modules
+
+rcs-gui
+    desktop application
+    visualization
+    user interaction
+
+examples
+    scripts
+    demo models
+    tutorials
+
+docker
+    reproducible environments
+```
+
+This separation allows:
+
+* scripting without GUI
+* GUI without rewriting solver
+* easier testing and CI
+
+---
+
+# ISSUES
+
+## 56. Build Windows standalone executable
+
+**Problem**
+
+Users should not need to install Python manually.
+
+**Goal**
+
+Provide a Windows release that runs immediately.
+
+**Acceptance Criteria**
+
+* packaged application builds successfully
+* executable launches GUI directly
+* dependencies bundled
+* distributed via GitHub Releases
+
+---
+
+## 57. Optional Windows MSI installer
+
+**Problem**
+
+Professional users prefer installers.
+
+**Goal**
+
+Provide standard Windows installer.
+
+**Acceptance Criteria**
+
+* MSI installer available
+* adds start menu shortcut
+* installs/uninstalls cleanly
+
+---
+
+## 58. Add Linux installation instructions
+
+**Problem**
+
+Linux users need clear setup instructions.
+
+**Goal**
+
+Support Linux researchers.
+
+**Acceptance Criteria**
+
+* tested on Ubuntu
+* install steps documented
+* dependencies listed
+* GUI launches correctly
+
+---
+
+## 59. Provide pip-installable core library
+
+**Problem**
+
+Researchers want to script simulations.
+
+**Goal**
+
+Allow installation via pip.
+
+**Acceptance Criteria**
+
+```
+pip install rcs-simulator
+```
+
+* installs core solver
+* exposes Python API
+* works without GUI
+
+---
+
+## 60. Create simple Python API
+
+**Problem**
+
+Researchers often prefer scripted workflows.
+
+**Goal**
+
+Allow simulations from Python scripts.
+
+Example usage:
+
+```python
+from rcs import simulate
+
+result = simulate(
+    model="aircraft.stl",
+    frequency_hz=10e9,
+    method="sbr"
+)
+```
+
+**Acceptance Criteria**
+
+* stable API
+* documented parameters
+* example scripts provided
+
+---
+
+## 61. Add CLI interface
+
+**Problem**
+
+Batch simulations should run without GUI.
+
+**Goal**
+
+Provide command-line interface.
+
+Example:
+
+```
+rcs-simulate aircraft.stl --freq 10e9 --method sbr
+```
+
+**Acceptance Criteria**
+
+* command-line tool available
+* supports configuration files
+* produces output data
+
+---
+
+## 62. Provide Docker environment
+
+**Problem**
+
+Dependency issues discourage adoption.
+
+**Goal**
+
+Provide reproducible container environment.
+
+**Acceptance Criteria**
+
+* Dockerfile builds successfully
+* simulation runs inside container
+* usable for headless runs
+
+---
+
+## 63. Add CI build pipeline
+
+**Problem**
+
+Manual builds are error-prone.
+
+**Goal**
+
+Automate testing and packaging.
+
+**Acceptance Criteria**
+
+* CI runs tests
+* builds release artifacts
+* checks installability
+
+---
+
+## 64. Provide example models
+
+**Problem**
+
+Users need immediate demonstrations.
+
+**Goal**
+
+Include sample scenes.
+
+Examples:
+
+```
+flat_plate
+dihedral
+trihedral
+simple_aircraft
+propeller_demo
+```
+
+**Acceptance Criteria**
+
+* examples load correctly
+* produce expected plots
+* included in repository
+
+---
+
+## 65. Add tutorial examples
+
+**Problem**
+
+Users must quickly understand workflow.
+
+**Goal**
+
+Provide beginner-friendly examples.
+
+Examples:
+
+```
+basic RCS simulation
+aspect sweep
+micro-Doppler example
+propeller simulation
+```
+
+**Acceptance Criteria**
+
+* step-by-step tutorial
+* reproducible results
+* minimal setup required
+
+---
+
+# OPTIONAL FEATURES (LATER)
+
+Not required for V1 but beneficial later.
+
+### Linux AppImage / Flatpak
+
+Portable Linux distribution.
+
+### Conda environment
+
+For research environments.
+
+### Jupyter tutorial notebooks
+
+Interactive educational examples.
+
+### Remote simulation mode
+
+Run solver on server while GUI acts as frontend.
+
+---
+
+# MINIMUM DISTRIBUTION GOAL (V1)
+
+To reach a usable first release:
+
+Required:
+
+```
+Windows standalone build
+Linux install instructions
+example scenes
+Python API
+```
+
+Optional but recommended:
+
+```
+CLI interface
+Docker environment
+```
+
+---
+
+# LONG-TERM DISTRIBUTION GOAL
+
+A mature release should allow:
+
+```
+GUI exploration
+scripted simulations
+batch processing
+reproducible research workflows
+```
+
+across both Windows and Linux environments.
+
+---
+
+# FINAL NOTE
+
+Ease of installation and clear examples are often the deciding factor for adoption.
+
+Many technically strong research tools fail because:
+
+```
+installation is difficult
+documentation is unclear
+examples are missing
+```
+
+Distribution quality should therefore be treated as a core project milestone.
+
+---
+
+If you'd like, I can also write a **README structure that makes the project look immediately professional to researchers** (this matters a lot for adoption).
+
