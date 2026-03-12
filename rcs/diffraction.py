@@ -16,8 +16,29 @@ from typing import Iterable, List, Optional, Tuple
 import numpy as np
 import trimesh
 
-from .physics import build_ray_intersector
+#from .rcs_engine import 
+def build_ray_intersector(mesh: trimesh.Trimesh):
+    """Create a ray-mesh intersector using the fastest available backend."""
+    try:
+        from trimesh.ray.ray_pyembree import RayMeshIntersector
 
+        return RayMeshIntersector(mesh)
+    except Exception:
+        try:
+            # ``ray_triangle`` relies on an R-tree accelerator. Surface this as a
+            # clear error instead of bubbling up a low-level ``ModuleNotFound``
+            # from trimesh internals so the GUI can present an actionable
+            # message.
+            import rtree  # noqa: F401
+
+            from trimesh.ray.ray_triangle import RayMeshIntersector
+
+            return RayMeshIntersector(mesh)
+        except ModuleNotFoundError as exc:  # pragma: no cover - environment specific
+            raise ModuleNotFoundError(
+                "Missing optional dependency 'rtree'. Install it via 'pip install rtree' "
+                "to enable ray-tracing based simulations."
+            ) from exc
 # ---------------------------------------------------------------------------
 # Tunable heuristics
 EDGE_SHARPNESS_DEG = 25.0

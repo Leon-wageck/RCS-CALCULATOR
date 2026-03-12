@@ -3,7 +3,7 @@ __all__ = [
     "materials",
     "presets",
     "math_utils",
-    "physics",
+    "rcs_engine",
     "gui",
     "nctr",
 ]
@@ -11,5 +11,5 @@ from . import gui
 from . import materials
 from . import math_utils
 from . import nctr
-from . import physics
+from . import rcs_engine
 from . import presets

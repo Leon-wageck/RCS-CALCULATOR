@@ -26,17 +26,20 @@ from typing import Callable, Iterable, List, Optional, Tuple, Any
 import numpy as np
 import trimesh
 
+
+
 from .diffraction import (
     SharpEdge,
     build_sharp_edges,
     corner_field,
     edge_diffraction_field,
+    build_ray_intersector
 )
 from .facet_po import facet_rcs
 from .math_utils import direction_grid, frequency_loss
-from .physics import MIN_ENERGY, build_ray_intersector
+#from .physics import MIN_ENERGY, build_ray_intersector
 
-
+MIN_ENERGY = 1e-6
 BAND_DEFAULTS = {
     "L": (1.0e9, 2.0e9),
     "S": (2.0e9, 4.0e9),
@@ -47,6 +50,7 @@ BAND_DEFAULTS = {
 
 # ---------------------------------------------------------------------------
 # helpers
+
 
 
 def to_dbsm(rcs_lin: np.ndarray) -> np.ndarray:
