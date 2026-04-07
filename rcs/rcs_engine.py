@@ -108,6 +108,7 @@ class SimulationSettings:
     radar_profile: Optional[str] = None
     tx_yaw_deg: Optional[float] = None
     tx_elev_deg: Optional[float] = None
+    em_reflectivity_mode: str = "multiply"
     max_workers: Optional[int] = None  # kept for backwards compatibility
 
     def frequencies(self) -> np.ndarray:
@@ -298,7 +299,7 @@ class RCSEngine:
             edges = tuple(build_sharp_edges(mesh))
 
         # Select effective scalar reflectivity for the current polarisation
-        reflectivity = self._select_reflectivity(material, settings.polarization)
+        pol_reflectivity = self._select_reflectivity(material, settings.polarization)
 
         # Only construct ray intersector when needed
         ray_intersector: Any = None
@@ -321,6 +322,12 @@ class RCSEngine:
             wavelength = self._compute_wavelength(freq_hz)
             k = 2.0 * np.pi / wavelength
             loss_per_reflection = frequency_loss(freq_ghz)
+            em_reflectivity = self._fresnel_reflectivity(material, freq_hz)
+            reflectivity = self._combine_reflectivity(
+                pol_reflectivity,
+                em_reflectivity,
+                settings.em_reflectivity_mode,
+            )
 
             if doppler_all is not None:
                 doppler_all[fi] = 2.0 * settings.target_speed_mps * freq_hz / 3e8
@@ -699,6 +706,62 @@ class RCSEngine:
             return max(float(0.5 * (refl_hh + refl_vv)), 0.0)
 
         return max(float(0.5 * (refl_hh + refl_vv)), 0.0)
+
+    @staticmethod
+    def _fresnel_reflectivity(material: Material, frequency_hz: float) -> float:
+        """Approximate normal-incidence Fresnel power reflectivity for a material.
+
+        The model uses complex relative permittivity:
+            eps_r_complex = eps_real - j*eps_imag - j*sigma/(omega*eps0)
+        and computes:
+            Gamma = (1 - sqrt(eps_r_complex)) / (1 + sqrt(eps_r_complex))
+            R = |Gamma|^2
+        """
+
+        eps0 = 8.8541878128e-12
+        omega = 2.0 * np.pi * max(float(frequency_hz), 1.0)
+
+        eps_real = float(getattr(material, "epsilon_real", 1.0) or 1.0)
+        eps_imag = float(getattr(material, "epsilon_imag", 0.0) or 0.0)
+        sigma = float(getattr(material, "conductivity", 0.0) or 0.0)
+
+        if not np.isfinite(eps_real):
+            eps_real = 1.0
+        if not np.isfinite(eps_imag):
+            eps_imag = 0.0
+        if not np.isfinite(sigma):
+            sigma = 0.0
+
+        eps_real = max(eps_real, 1e-6)
+        eps_complex = complex(eps_real, -(eps_imag + sigma / (omega * eps0)))
+        n2 = np.sqrt(eps_complex)
+        gamma = (1.0 - n2) / (1.0 + n2)
+        reflectivity = float(np.abs(gamma) ** 2)
+        return float(np.clip(reflectivity, 0.0, 1.0))
+
+    @staticmethod
+    def _combine_reflectivity(
+        pol_reflectivity: float,
+        em_reflectivity: float,
+        mode: Optional[str],
+    ) -> float:
+        """Combine polarization and EM reflectivity according to *mode*.
+
+        Modes:
+        - "multiply" (default): pol * em
+        - "off"/"legacy": use polarization term only
+        - "override"/"em_only": use EM term only
+        """
+
+        pol = float(np.clip(pol_reflectivity, 0.0, 1.0))
+        em = float(np.clip(em_reflectivity, 0.0, 1.0))
+        key = (mode or "multiply").strip().lower()
+
+        if key in {"off", "none", "disabled", "legacy", "pol_only"}:
+            return pol
+        if key in {"override", "em_only", "fresnel_only"}:
+            return em
+        return float(np.clip(pol * em, 0.0, 1.0))
 
 
 __all__ = [
